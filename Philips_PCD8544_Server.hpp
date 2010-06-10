@@ -33,7 +33,7 @@ Status::Status_t process(){
 
   // Write packet contents out to screen, beginning at first row and performing a linefeed
   // when the right edge of the screen is encountered.
-  for(uint8_t Y = 1; Y <= MAX_Y_FONT; Y++){
+  for(uint8_t Y = 1; Y <= LCD_t::MAX_Y_FONT; Y++){
     // Start at leftmost edge of screen
     lcd->gotoXYFont(1,Y);
     while(data_ptr < offsetPacket.packet->back()){

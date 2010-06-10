@@ -37,17 +37,9 @@ static const uint8_t OK = 0;
 static const uint8_t OUT_OF_BORDER = 1;
 static const uint8_t OK_WITH_WRAP = 2;
 
-static const uint8_t LCD_X_RES = 84;    /* x resolution */
-static const uint8_t LCD_Y_RES = 48;    /* y resolution */
 static const uint8_t EMPTY_SPACE_BARS = 2;
 static const uint8_t BAR_X            = 5;
 static const uint8_t BAR_Y            = 38;
-
-static const uint8_t MAX_X_FONT = LCD_X_RES / 6;
-static const uint8_t MAX_Y_FONT = LCD_Y_RES / 8;
-
-/* Cache size in bytes ( 84 * 48 ) / 8 = 504 bytes */
-static const uint16_t LCD_CACHE_SIZE = ( LCD_X_RES * LCD_Y_RES ) / 8;
 
 /* Type definition */
 typedef uint8_t  byte;
@@ -77,7 +69,7 @@ uint8_t get_font_byte(uint8_t x, uint8_t y);
 // Architecture-specific delay routine.
 static void Delay ( void );
 
-template <typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t>
+template <typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t, int X_RES=84, int Y_RES=48>
 class Philips_PCD8544 {
 private:
 // Architecture-specific hardware.
@@ -86,8 +78,16 @@ private:
    LCD_CE_pin_t LCD_CE_pin;
   LCD_RST_pin_t LCD_RST_pin;
 
+public:
+  static const uint8_t MAX_X_FONT = X_RES / 6;
+  static const uint8_t MAX_Y_FONT = Y_RES / 8;
+
+/* Cache size in bytes ( 84 * 48 ) / 8 = 504 bytes */
+  static const uint16_t CACHE_SIZE = ( X_RES * Y_RES ) / 8;
+
+private:
 /* Cache buffer in SRAM 84*48 bits or 504 bytes */
-  byte screenCache[ LCD_CACHE_SIZE ];
+  byte screenCache[ CACHE_SIZE ];
 
 // Modified to eliminate signedness [ANC 2010-04-24]
 /* Cache index */

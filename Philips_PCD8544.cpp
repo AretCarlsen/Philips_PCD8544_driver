@@ -76,7 +76,7 @@
  * Argument(s)  :  None.
  * Return value :  None.
  */
-template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t> void Philips_PCD8544<SPI_bus_t, LCD_DC_pin_t, LCD_CE_pin_t, LCD_RST_pin_t>::init ( void ) {
+template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t, int X_RES, int Y_RES> void Philips_PCD8544<SPI_bus_t, LCD_DC_pin_t, LCD_CE_pin_t, LCD_RST_pin_t, X_RES, Y_RES>::init ( void ) {
 /*
     // Pull-up on reset pin.
     LCD_RST_pin.enable_pullup();
@@ -100,7 +100,7 @@ template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typen
     send( 0x0C, LCD_CMD ); /* LCD in normal mode. */
 
     /* Reset watermark pointers to empty */
-    LoWaterMark = LCD_CACHE_SIZE;
+    LoWaterMark = CACHE_SIZE;
     HiWaterMark = 0;
 
     /* Clear display on first time use */
@@ -114,7 +114,7 @@ template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typen
  * Argument(s)  :  contrast -> Contrast value from 0x00 to 0x7F.
  * Return value :  None.
  */
-template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t> void Philips_PCD8544<SPI_bus_t, LCD_DC_pin_t, LCD_CE_pin_t, LCD_RST_pin_t>::contrast ( byte contrast ) {
+template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t, int X_RES, int Y_RES> void Philips_PCD8544<SPI_bus_t, LCD_DC_pin_t, LCD_CE_pin_t, LCD_RST_pin_t, X_RES, Y_RES>::contrast ( byte contrast ) {
     /* LCD Extended Commands. */
     send( 0x21, LCD_CMD );
 
@@ -132,20 +132,20 @@ template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typen
  * Return value :  None.
  * Note         :  Based on Sylvain Bissonette's code
  */
-template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t> void Philips_PCD8544<SPI_bus_t, LCD_DC_pin_t, LCD_CE_pin_t, LCD_RST_pin_t>::clear ( void ) {
+template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t, int X_RES, int Y_RES> void Philips_PCD8544<SPI_bus_t, LCD_DC_pin_t, LCD_CE_pin_t, LCD_RST_pin_t, X_RES, Y_RES>::clear ( void ) {
 // Removed in version 0.2.6, March 14 2009
 // Optimized by Jakub Lasinski
 //    int i;
 //
 //    /* Set 0x00 to all screenCache's contents */
-//    for ( i = 0; i < LCD_CACHE_SIZE; i++ )
+//    for ( i = 0; i < CACHE_SIZE; i++ )
 //    {
 //        screenCache[ i ] = 0x00;
 //    }
-    memset(screenCache,0x00,LCD_CACHE_SIZE);  //Suggestion - its faster and its 10 bytes less in program mem
+    memset(screenCache,0x00,CACHE_SIZE);  //Suggestion - its faster and its 10 bytes less in program mem
     /* Reset watermark pointers to full */
     LoWaterMark = 0;
-    HiWaterMark = LCD_CACHE_SIZE - 1;
+    HiWaterMark = CACHE_SIZE - 1;
 
     /* Set update flag to be true */
     updateActive = TRUE;
@@ -159,7 +159,7 @@ template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typen
  * Return value :  see return value in pcd8544.h
  * Note         :  Based on Sylvain Bissonette's code
  */
-template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t> byte Philips_PCD8544<SPI_bus_t, LCD_DC_pin_t, LCD_CE_pin_t, LCD_RST_pin_t>::gotoXYFont ( byte x, byte y ) {
+template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t, int X_RES, int Y_RES> byte Philips_PCD8544<SPI_bus_t, LCD_DC_pin_t, LCD_CE_pin_t, LCD_RST_pin_t, X_RES, Y_RES>::gotoXYFont ( byte x, byte y ) {
     /* Boundary check, slow down the speed but will guarantee this code wont fail */
     /* Version 0.2.5 - Fixed on Dec 25, 2008 (XMAS) */
     if( x > MAX_X_FONT)
@@ -180,7 +180,7 @@ template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typen
  *                 ch   -> Character to write.
  * Return value :  see pcd8544.h about return value
  */
-template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t> byte Philips_PCD8544<SPI_bus_t, LCD_DC_pin_t, LCD_CE_pin_t, LCD_RST_pin_t>::chr ( LcdFontSize size, byte ch ) {
+template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t, int X_RES, int Y_RES> byte Philips_PCD8544<SPI_bus_t, LCD_DC_pin_t, LCD_CE_pin_t, LCD_RST_pin_t, X_RES, Y_RES>::chr ( LcdFontSize size, byte ch ) {
     byte i, c;
     byte b1, b2;
     CacheIndex_t  tmpIdx;
@@ -240,7 +240,7 @@ template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typen
 
         /* Update x cursor position. */
         /* Version 0.2.5 - Possible bug fixed on Dec 25,2008 */
-        CacheIdx = (CacheIdx + 11) % LCD_CACHE_SIZE;
+        CacheIdx = (CacheIdx + 11) % CACHE_SIZE;
     }
 
     if ( CacheIdx > HiWaterMark ){
@@ -251,8 +251,8 @@ template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typen
     /* Horizontal gap between characters. */
     /* Version 0.2.5 - Possible bug fixed on Dec 25,2008 */
     screenCache[CacheIdx] = 0x00;
-    /* At index number LCD_CACHE_SIZE - 1, wrap to 0 */
-    if(CacheIdx == (LCD_CACHE_SIZE - 1) )
+    /* At index number CACHE_SIZE - 1, wrap to 0 */
+    if(CacheIdx == (CACHE_SIZE - 1) )
     {
         CacheIdx = 0;
         return OK_WITH_WRAP;
@@ -272,7 +272,7 @@ template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typen
  *                              into screenCache.
  * Return value :  see return value on pcd8544.h
  */
-template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t> byte Philips_PCD8544<SPI_bus_t, LCD_DC_pin_t, LCD_CE_pin_t, LCD_RST_pin_t>::str ( LcdFontSize size, byte dataArray[] ) {
+template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t, int X_RES, int Y_RES> byte Philips_PCD8544<SPI_bus_t, LCD_DC_pin_t, LCD_CE_pin_t, LCD_RST_pin_t, X_RES, Y_RES>::str ( LcdFontSize size, byte dataArray[] ) {
     byte tmpIdx=0;
     byte response;
     while( dataArray[ tmpIdx ] != '\0' ){
@@ -301,7 +301,7 @@ template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typen
  * Example      :  fStr(FONT_1X, PSTR("Hello World"));
  *                 fStr(FONT_1X, &name_of_string_as_array);
  */
-template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t> byte Philips_PCD8544<SPI_bus_t, LCD_DC_pin_t, LCD_CE_pin_t, LCD_RST_pin_t>::fStr ( LcdFontSize size, const byte *dataPtr ) {
+template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t, int X_RES, int Y_RES> byte Philips_PCD8544<SPI_bus_t, LCD_DC_pin_t, LCD_CE_pin_t, LCD_RST_pin_t, X_RES, Y_RES>::fStr ( LcdFontSize size, const byte *dataPtr ) {
     byte c;
     byte response;
     for ( c = pgm_read_byte( dataPtr ); c; ++dataPtr, c = pgm_read_byte( dataPtr ) )
@@ -323,14 +323,14 @@ template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typen
  * Return value :  see return value on pcd8544.h
  * Note         :  Based on Sylvain Bissonette's code
  */
-template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t> byte Philips_PCD8544<SPI_bus_t, LCD_DC_pin_t, LCD_CE_pin_t, LCD_RST_pin_t>::pixel ( byte x, byte y, PixelMode mode ) {
+template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t, int X_RES, int Y_RES> byte Philips_PCD8544<SPI_bus_t, LCD_DC_pin_t, LCD_CE_pin_t, LCD_RST_pin_t, X_RES, Y_RES>::pixel ( byte x, byte y, PixelMode mode ) {
     CacheIndex_t  index;
     byte  offset;
     byte  data;
 
     /* Prevent from getting out of border */
-    if ( x > LCD_X_RES ) return OUT_OF_BORDER;
-    if ( y > LCD_Y_RES ) return OUT_OF_BORDER;
+    if ( x > X_RES ) return OUT_OF_BORDER;
+    if ( y > Y_RES ) return OUT_OF_BORDER;
 
     /* Recalculating index and offset */
     index = ( ( y / 8 ) * 84 ) + x;
@@ -374,7 +374,7 @@ template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typen
  *                 mode   -> Off, On or Xor. See enum in pcd8544.h.
  * Return value :  see return value on pcd8544.h
  */
-template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t> byte Philips_PCD8544<SPI_bus_t, LCD_DC_pin_t, LCD_CE_pin_t, LCD_RST_pin_t>::line ( byte x1, byte x2, byte y1, byte y2, PixelMode mode ) {
+template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t, int X_RES, int Y_RES> byte Philips_PCD8544<SPI_bus_t, LCD_DC_pin_t, LCD_CE_pin_t, LCD_RST_pin_t, X_RES, Y_RES>::line ( byte x1, byte x2, byte y1, byte y2, PixelMode mode ) {
     int dx, dy, stepx, stepy, fraction;
     byte response;
 
@@ -475,13 +475,13 @@ template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typen
  *				   mode   -> Off, On or Xor. See enum in pcd8544.h.
  * Return value :  see return value on pcd8544.h
  */
-template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t> byte Philips_PCD8544<SPI_bus_t, LCD_DC_pin_t, LCD_CE_pin_t, LCD_RST_pin_t>::singleBar ( byte baseX, byte baseY, byte height, byte width, PixelMode mode ) {
+template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t, int X_RES, int Y_RES> byte Philips_PCD8544<SPI_bus_t, LCD_DC_pin_t, LCD_CE_pin_t, LCD_RST_pin_t, X_RES, Y_RES>::singleBar ( byte baseX, byte baseY, byte height, byte width, PixelMode mode ) {
 	byte tmpIdxX,tmpIdxY,tmp;
 
     byte response;
 
     /* Checking border */
-	if ( ( baseX > LCD_X_RES ) || ( baseY > LCD_Y_RES ) ) return OUT_OF_BORDER;
+	if ( ( baseX > X_RES ) || ( baseY > Y_RES ) ) return OUT_OF_BORDER;
 
 	if ( height > baseY )
 		tmp = 0;
@@ -514,15 +514,15 @@ template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typen
  * Return value :  see return value on pcd8544.h
  * Note         :  Please check EMPTY_SPACE_BARS, BAR_X, BAR_Y in pcd8544.h
  */
-template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t> byte Philips_PCD8544<SPI_bus_t, LCD_DC_pin_t, LCD_CE_pin_t, LCD_RST_pin_t>::bars ( byte data[], byte numbBars, byte width, byte multiplier ) {
+template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t, int X_RES, int Y_RES> byte Philips_PCD8544<SPI_bus_t, LCD_DC_pin_t, LCD_CE_pin_t, LCD_RST_pin_t, X_RES, Y_RES>::bars ( byte data[], byte numbBars, byte width, byte multiplier ) {
 	byte b;
 	byte tmpIdx = 0;
     byte response;
 
 	for ( b = 0;  b < numbBars ; b++ )
 	{
-        /* Preventing from out of border (LCD_X_RES) */
-		if ( tmpIdx > LCD_X_RES ) return OUT_OF_BORDER;
+        /* Preventing from out of border (X_RES) */
+		if ( tmpIdx > X_RES ) return OUT_OF_BORDER;
 
 		/* Calculate x axis */
 		tmpIdx = ((width + EMPTY_SPACE_BARS) * b) + BAR_X;
@@ -548,12 +548,12 @@ template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typen
  *				   mode -> Off, On or Xor. See enum in pcd8544.h.
  * Return value :  see return value on pcd8544.h.
  */
-template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t> byte Philips_PCD8544<SPI_bus_t, LCD_DC_pin_t, LCD_CE_pin_t, LCD_RST_pin_t>::rect ( byte x1, byte x2, byte y1, byte y2, PixelMode mode ) {
+template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t, int X_RES, int Y_RES> byte Philips_PCD8544<SPI_bus_t, LCD_DC_pin_t, LCD_CE_pin_t, LCD_RST_pin_t, X_RES, Y_RES>::rect ( byte x1, byte x2, byte y1, byte y2, PixelMode mode ) {
 	byte tmpIdxX,tmpIdxY;
     byte response;
 
 	/* Checking border */
-	if ( ( x1 > LCD_X_RES ) ||  ( x2 > LCD_X_RES ) || ( y1 > LCD_Y_RES ) || ( y2 > LCD_Y_RES ) )
+	if ( ( x1 > X_RES ) ||  ( x2 > X_RES ) || ( y1 > Y_RES ) || ( y2 > Y_RES ) )
 		/* If out of border then return */
 		return OUT_OF_BORDER;
 
@@ -583,20 +583,20 @@ template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typen
  * Return value :  None.
  * Example      :  image(&sample_image_declared_as_array);
  */
-template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t> void Philips_PCD8544<SPI_bus_t, LCD_DC_pin_t, LCD_CE_pin_t, LCD_RST_pin_t>::image ( const byte *imageData ) {
+template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t, int X_RES, int Y_RES> void Philips_PCD8544<SPI_bus_t, LCD_DC_pin_t, LCD_CE_pin_t, LCD_RST_pin_t, X_RES, Y_RES>::image ( const byte *imageData ) {
 	/* Initialize screenCache index to 0 */
 //	CacheIdx = 0;
 //	/* While within screenCache range */
-//    for ( CacheIdx = 0; CacheIdx < LCD_CACHE_SIZE; CacheIdx++ )
+//    for ( CacheIdx = 0; CacheIdx < CACHE_SIZE; CacheIdx++ )
 //    {
 //		/* Copy data from pointer to screenCache buffer */
 //        screenCache[CacheIdx] = pgm_read_byte( imageData++ );
 //    }
 	/* optimized by Jakub Lasinski, version 0.2.6, March 14, 2009 */
-    memcpy_P(screenCache,imageData,LCD_CACHE_SIZE);	//Same as aboeve - 6 bytes less and faster instruction
+    memcpy_P(screenCache,imageData,CACHE_SIZE);	//Same as aboeve - 6 bytes less and faster instruction
 	/* Reset watermark pointers to be full */
     LoWaterMark = 0;
-    HiWaterMark = LCD_CACHE_SIZE - 1;
+    HiWaterMark = CACHE_SIZE - 1;
 
 	/* Set update flag to be true */
     updateActive = TRUE;
@@ -608,25 +608,25 @@ template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typen
  * Argument(s)  :  None.
  * Return value :  None.
  */
-template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t> void Philips_PCD8544<SPI_bus_t, LCD_DC_pin_t, LCD_CE_pin_t, LCD_RST_pin_t>::update ( void ) {
+template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t, int X_RES, int Y_RES> void Philips_PCD8544<SPI_bus_t, LCD_DC_pin_t, LCD_CE_pin_t, LCD_RST_pin_t, X_RES, Y_RES>::update ( void ) {
     CacheIndex_t i;
 
-    if ( LoWaterMark >= LCD_CACHE_SIZE )
-        LoWaterMark = LCD_CACHE_SIZE - 1;
+    if ( LoWaterMark >= CACHE_SIZE )
+        LoWaterMark = CACHE_SIZE - 1;
 
-    if ( HiWaterMark >= LCD_CACHE_SIZE )
-        HiWaterMark = LCD_CACHE_SIZE - 1;
+    if ( HiWaterMark >= CACHE_SIZE )
+        HiWaterMark = CACHE_SIZE - 1;
 
     /*  Set base address according to LoWaterMark. */
-    send( 0x80 | ( LoWaterMark % LCD_X_RES ), LCD_CMD );
-    send( 0x40 | ( LoWaterMark / LCD_X_RES ), LCD_CMD );
+    send( 0x80 | ( LoWaterMark % X_RES ), LCD_CMD );
+    send( 0x40 | ( LoWaterMark / X_RES ), LCD_CMD );
 
     /*  Serialize the display buffer. */
     for ( i = LoWaterMark; i <= HiWaterMark; i++ )
         send( screenCache[ i ], LCD_DATA );
 
     /*  Reset watermark pointers. */
-    LoWaterMark = LCD_CACHE_SIZE - 1;
+    LoWaterMark = CACHE_SIZE - 1;
     HiWaterMark = 0;
 
     /* Set update flag to be true */
@@ -641,7 +641,7 @@ template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typen
  * Return value :  None.
  */
 // Was static
-template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t> void Philips_PCD8544<SPI_bus_t, LCD_DC_pin_t, LCD_CE_pin_t, LCD_RST_pin_t>::send ( byte data, LcdCmdData cd ) {
+template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t, int X_RES, int Y_RES> void Philips_PCD8544<SPI_bus_t, LCD_DC_pin_t, LCD_CE_pin_t, LCD_RST_pin_t, X_RES, Y_RES>::send ( byte data, LcdCmdData cd ) {
     /*  Enable display controller (active low). */
     LCD_CE_pin.set_output_low();
 
