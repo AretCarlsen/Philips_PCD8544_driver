@@ -1,3 +1,6 @@
+// Philips PCD8544 graphic LCD driver (C++).
+// Licensed under GPLv3. See license.txt or <http://www.gnu.org/licenses/>.
+
 #pragma once
 
 #include "Philips_PCD8544.hpp"

@@ -1,0 +1,3 @@
+Philips PCD8544 C++ driver. Object-oriented and templated for ease of porting.
+See license.txt for licensing.
+

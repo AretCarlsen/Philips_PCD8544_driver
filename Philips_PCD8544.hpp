@@ -1,30 +1,6 @@
-/*
- *
- * Name         :  pcd8544.h
- *
- * Description  :  This is header file for the PCD8544 graphic LCD driver.
- *                 Based on the code written by Sylvain Bissonette
- *
- * Author       :  Fandi Gunawan <fandigunawan@gmail.com>
- * Website      :  http://fandigunawan.wordpress.com
- *
- * Credit       :  Sylvain Bissonette (2003)
- *                 Louis Frigon (2003)
- *                 Other people (2010)
- *
- * License      :  GPL v. 3
- *
- * Compiler     :  WinAVR, GCC for AVR platform
- *                 Tested version :
- *                 - 20070525
- *                 - 20071221
- *                 - 20081225
- * Compiler note:  Please be aware of using older/newer version since WinAVR
- *                 is in extensive development. Please compile with parameter -O1
- *
- * History      :
- * Please refer to pcd8544.c
- */
+// Philips PCD8544 graphic LCD driver (C++).
+// Licensed under GPLv3. See license.txt or <http://www.gnu.org/licenses/>.
+
 
 #pragma once
 

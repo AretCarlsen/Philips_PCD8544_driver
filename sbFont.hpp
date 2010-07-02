@@ -1,6 +1,6 @@
 
 /*
- * Character lookup table code was taken from the work of Sylvain Bissonette
+ * Character lookup table code was taken from the work of Sylvain Bissonette.
  * This table defines the standard ASCII characters in a 5x7 dot format.
  */
 {
