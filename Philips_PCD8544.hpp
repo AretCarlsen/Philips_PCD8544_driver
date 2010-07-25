@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <ATcommon/arch/avr/avr.hpp>
-
 namespace Philips_PCD8544 {
 
 /* For return value */

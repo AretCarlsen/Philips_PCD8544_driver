@@ -64,16 +64,7 @@ template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typen
  * Note         :  Based on Sylvain Bissonette's code
  */
 template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t, int X_RES, int Y_RES> void Philips_PCD8544<SPI_bus_t, LCD_DC_pin_t, LCD_CE_pin_t, LCD_RST_pin_t, X_RES, Y_RES>::clear ( void ) {
-// Removed in version 0.2.6, March 14 2009
-// Optimized by Jakub Lasinski
-//    int i;
-//
-//    /* Set 0x00 to all screenCache's contents */
-//    for ( i = 0; i < CACHE_SIZE; i++ )
-//    {
-//        screenCache[ i ] = 0x00;
-//    }
-    memset(screenCache,0x00,CACHE_SIZE);  //Suggestion - its faster and its 10 bytes less in program mem
+    memset(screenCache,0x00,CACHE_SIZE);
     /* Reset watermark pointers to full */
     LoWaterMark = 0;
     HiWaterMark = CACHE_SIZE - 1;
@@ -92,7 +83,6 @@ template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typen
  */
 template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t, int X_RES, int Y_RES> byte Philips_PCD8544<SPI_bus_t, LCD_DC_pin_t, LCD_CE_pin_t, LCD_RST_pin_t, X_RES, Y_RES>::gotoXYFont ( byte x, byte y ) {
     /* Boundary check, slow down the speed but will guarantee this code wont fail */
-    /* Version 0.2.5 - Fixed on Dec 25, 2008 (XMAS) */
     if( x > MAX_X_FONT)
         return OUT_OF_BORDER;
     if( y > MAX_Y_FONT)
@@ -127,13 +117,11 @@ template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typen
     }
 
     if ( size == FONT_1X ){
-        for ( i = 0; i < 5; i++ )
-        {
+        for ( i = 0; i < 5; i++ ) {
             /* Copy lookup table from Flash ROM to screenCache */
             screenCache[CacheIdx++] = get_font_byte(ch - 32, i) << 1;
         }
     }else if ( size == FONT_2X ){
-// Modified to eliminate signedness [ANC 2010-04-24]
         if(CacheIdx < 84){
           LoWaterMark = 0;
           return OUT_OF_BORDER;
@@ -144,8 +132,7 @@ template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typen
         if ( tmpIdx < LoWaterMark )
             LoWaterMark = tmpIdx;
 
-        for ( i = 0; i < 5; i++ )
-        {
+        for ( i = 0; i < 5; i++ ) {
             /* Copy lookup table from Flash ROM to temporary c */
             c = get_font_byte(ch - 32, i) << 1;
             /* Enlarge image */
@@ -183,8 +170,7 @@ template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typen
     /* Version 0.2.5 - Possible bug fixed on Dec 25,2008 */
     screenCache[CacheIdx] = 0x00;
     /* At index number CACHE_SIZE - 1, wrap to 0 */
-    if(CacheIdx == (CACHE_SIZE - 1) )
-    {
+    if(CacheIdx == (CACHE_SIZE - 1) ) {
         CacheIdx = 0;
         return OK_WITH_WRAP;
     }
@@ -235,8 +221,7 @@ template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typen
 template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t, int X_RES, int Y_RES> byte Philips_PCD8544<SPI_bus_t, LCD_DC_pin_t, LCD_CE_pin_t, LCD_RST_pin_t, X_RES, Y_RES>::fStr ( LcdFontSize size, const byte *dataPtr ) {
     byte c;
     byte response;
-    for ( c = pgm_read_byte( dataPtr ); c; ++dataPtr, c = pgm_read_byte( dataPtr ) )
-    {
+    for ( c = pgm_read_byte( dataPtr ); c; ++dataPtr, c = pgm_read_byte( dataPtr ) ) {
         /* Put char */
         response = chr( size, c );
         if(response == OUT_OF_BORDER)
@@ -319,26 +304,20 @@ template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typen
     dx = x2 - x1;
 
     /* dy is negative */
-    if ( dy < 0 )
-    {
+    if ( dy < 0 ) {
         dy    = -dy;
         stepy = -1;
     }
     else
-    {
         stepy = 1;
-    }
 
     /* dx is negative */
-    if ( dx < 0 )
-    {
+    if ( dx < 0 ) {
         dx    = -dx;
         stepx = -1;
     }
     else
-    {
         stepx = 1;
-    }
 
     dx <<= 1;
     dy <<= 1;
@@ -349,14 +328,11 @@ template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typen
         return response;
 
     /* Draw next positions until end */
-    if ( dx > dy )
-    {
+    if ( dx > dy ) {
         /* Take fraction */
         fraction = dy - ( dx >> 1);
-        while ( x1 != x2 )
-        {
-            if ( fraction >= 0 )
-            {
+        while ( x1 != x2 ) {
+            if ( fraction >= 0 ) {
                 y1 += stepy;
                 fraction -= dx;
             }
@@ -367,17 +343,12 @@ template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typen
             response = pixel( x1, y1, mode );
             if(response)
                 return response;
-
         }
-    }
-    else
-    {
+    } else {
         /* Take fraction */
         fraction = dx - ( dy >> 1);
-        while ( y1 != y2 )
-        {
-            if ( fraction >= 0 )
-            {
+        while ( y1 != y2 ) {
+            if ( fraction >= 0 ) {
                 x1 += stepx;
                 fraction -= dy;
             }
@@ -420,15 +391,13 @@ template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typen
 		tmp = baseY - height;
 
     /* Draw lines */
-	for ( tmpIdxY = tmp; tmpIdxY < baseY; tmpIdxY++ )
-	{
-		for ( tmpIdxX = baseX; tmpIdxX < (baseX + width); tmpIdxX++ )
-        {
-			response = pixel( tmpIdxX, tmpIdxY, mode );
+	for ( tmpIdxY = tmp; tmpIdxY < baseY; tmpIdxY++ ) {
+	  for ( tmpIdxX = baseX; tmpIdxX < (baseX + width); tmpIdxX++ ) {
+	    response = pixel( tmpIdxX, tmpIdxY, mode );
             if(response)
                 return response;
 
-        }
+          }
 	}
 
     /* Set update flag to be true */
@@ -446,28 +415,26 @@ template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typen
  * Note         :  Please check EMPTY_SPACE_BARS, BAR_X, BAR_Y in pcd8544.h
  */
 template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t, int X_RES, int Y_RES> byte Philips_PCD8544<SPI_bus_t, LCD_DC_pin_t, LCD_CE_pin_t, LCD_RST_pin_t, X_RES, Y_RES>::bars ( byte data[], byte numbBars, byte width, byte multiplier ) {
-	byte b;
-	byte tmpIdx = 0;
+    byte b;
+    byte tmpIdx = 0;
     byte response;
 
-	for ( b = 0;  b < numbBars ; b++ )
-	{
+    for ( b = 0;  b < numbBars ; b++ ) {
         /* Preventing from out of border (X_RES) */
-		if ( tmpIdx > X_RES ) return OUT_OF_BORDER;
+      if ( tmpIdx > X_RES ) return OUT_OF_BORDER;
 
-		/* Calculate x axis */
-		tmpIdx = ((width + EMPTY_SPACE_BARS) * b) + BAR_X;
+      /* Calculate x axis */
+      tmpIdx = ((width + EMPTY_SPACE_BARS) * b) + BAR_X;
 
-		/* Draw single bar */
-		response = singleBar( tmpIdx, BAR_Y, data[ b ] * multiplier, width, PIXEL_ON);
-        if(response == OUT_OF_BORDER)
-            return response;
-	}
+      /* Draw single bar */
+      response = singleBar( tmpIdx, BAR_Y, data[ b ] * multiplier, width, PIXEL_ON);
+      if(response == OUT_OF_BORDER)
+        return response;
+    }
 
-	/* Set update flag to be true */
-	updateActive = TRUE;
+    /* Set update flag to be true */
+    updateActive = TRUE;
     return OK;
-
 }
 /*
  * Name         :  rect
@@ -488,13 +455,10 @@ template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typen
 		/* If out of border then return */
 		return OUT_OF_BORDER;
 
-	if ( ( x2 > x1 ) && ( y2 > y1 ) )
-	{
-		for ( tmpIdxY = y1; tmpIdxY < y2; tmpIdxY++ )
-		{
+	if ( ( x2 > x1 ) && ( y2 > y1 ) ) {
+		for ( tmpIdxY = y1; tmpIdxY < y2; tmpIdxY++ ) {
 			/* Draw line horizontally */
-			for ( tmpIdxX = x1; tmpIdxX < x2; tmpIdxX++ )
-            {
+			for ( tmpIdxX = x1; tmpIdxX < x2; tmpIdxX++ ) {
 				/* Draw a pixel */
 				response = pixel( tmpIdxX, tmpIdxY, mode );
                 if(response)
