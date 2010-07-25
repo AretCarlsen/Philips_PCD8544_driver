@@ -471,29 +471,39 @@ template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typen
 	}
     return OK;
 }
+
 /*
- * Name         :  image
- * Description  :  Image mode display routine.
- * Argument(s)  :  Address of image in hexes
+ * Name         :  writeBitmap and writeBitmap_P
+ * Description  :  Bitmap write routine. Writes at any desired offset.
+ * Argument(s)  :  Address of image in hexes, Offset of first byte to be written (default 0), and Size of bitmap data to write.
+                   _P version expects an imageData source address from Program memory (for the memcpy_P routine).
  * Return value :  None.
  * Example      :  image(&sample_image_declared_as_array);
  */
-template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t, int X_RES, int Y_RES> void Philips_PCD8544<SPI_bus_t, LCD_DC_pin_t, LCD_CE_pin_t, LCD_RST_pin_t, X_RES, Y_RES>::image ( const byte *imageData ) {
-	/* Initialize screenCache index to 0 */
-//	CacheIdx = 0;
-//	/* While within screenCache range */
-//    for ( CacheIdx = 0; CacheIdx < CACHE_SIZE; CacheIdx++ )
-//    {
-//		/* Copy data from pointer to screenCache buffer */
-//        screenCache[CacheIdx] = pgm_read_byte( imageData++ );
-//    }
-	/* optimized by Jakub Lasinski, version 0.2.6, March 14, 2009 */
-    memcpy_P(screenCache,imageData,CACHE_SIZE);	//Same as aboeve - 6 bytes less and faster instruction
-	/* Reset watermark pointers to be full */
-    LoWaterMark = 0;
-    HiWaterMark = CACHE_SIZE - 1;
+template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t, int X_RES, int Y_RES> void Philips_PCD8544<SPI_bus_t, LCD_DC_pin_t, LCD_CE_pin_t, LCD_RST_pin_t, X_RES, Y_RES>::writeBitmap(const byte *imageData, const CacheIndex_t offset, CacheIndex_t size) {
+  // Sanity check
+    if(size > CACHE_SIZE) size = CACHE_SIZE;
 
-	/* Set update flag to be true */
+  /* Initialize screenCache index to 0 */
+    memcpy(screenCache,imageData,size);
+
+  /* Expand watermark pointers, if necessary. */
+    setMinimumWaterMarks(offset, offset + size - 1);
+
+  /* Set update pending semaphore. */
+    updateActive = TRUE;
+}
+template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t, int X_RES, int Y_RES> void Philips_PCD8544<SPI_bus_t, LCD_DC_pin_t, LCD_CE_pin_t, LCD_RST_pin_t, X_RES, Y_RES>::writeBitmap_P(const byte *imageData, const CacheIndex_t offset, CacheIndex_t size) {
+  // Sanity check
+    if(size > CACHE_SIZE) size = CACHE_SIZE;
+
+  /* Initialize screenCache index to 0 */
+    memcpy_P(screenCache,imageData,size);
+
+  /* Expand watermark pointers, if necessary. */
+    setMinimumWaterMarks(offset, offset + size - 1);
+
+  /* Set update pending semaphore. */
     updateActive = TRUE;
 }
 
@@ -505,7 +515,7 @@ template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typen
  */
 template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t, int X_RES, int Y_RES> void Philips_PCD8544<SPI_bus_t, LCD_DC_pin_t, LCD_CE_pin_t, LCD_RST_pin_t, X_RES, Y_RES>::update ( void ) {
     CacheIndex_t i;
-
+  // LoWaterMark is unsigned, so lower boundary of 0 is innately enforced.
     if ( LoWaterMark >= CACHE_SIZE )
         LoWaterMark = CACHE_SIZE - 1;
 

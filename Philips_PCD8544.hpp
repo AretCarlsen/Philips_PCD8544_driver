@@ -18,7 +18,7 @@ static const uint8_t BAR_Y            = 38;
 /* Type definition */
 typedef uint8_t  byte;
 
-// Modified by ANC 2010-04-24 (to eliminate signedness). (Was a signed int.)
+// Cache index.
 typedef uint16_t CacheIndex_t;
 
 /* Enumeration */
@@ -88,7 +88,19 @@ public:
   void init       ( void );
   void clear      ( void );
   void update     ( void );
-  void image      ( const byte *imageData );
+
+  void writeBitmap(const byte *imageData, const CacheIndex_t offset = 0, CacheIndex_t size = CACHE_SIZE);
+  // Program memory version.
+  void writeBitmap_P(const byte *imageData, const CacheIndex_t offset = 0, CacheIndex_t size = CACHE_SIZE);
+
+  // Expand watermark pointers to new minimums.
+  void setMinimumWaterMarks(const CacheIndex_t new_LoWaterMark, const CacheIndex_t new_HiWaterMark){
+    if(new_LoWaterMark < LoWaterMark) LoWaterMark = new_LoWaterMark;
+    if(new_HiWaterMark > HiWaterMark) HiWaterMark = new_HiWaterMark;
+  }
+  // Historical alias.
+  void image      ( const byte *imageData ){ writeBitmap_P(imageData); }
+
   void contrast   ( byte contrast );
   byte gotoXYFont ( byte x, byte y );
   byte chr        ( LcdFontSize size, byte ch );

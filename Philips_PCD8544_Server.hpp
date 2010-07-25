@@ -13,11 +13,11 @@
 namespace Philips_PCD8544{
 
 template <typename LCD_t>
-class StringLCDServer : public SimpleServer, public Process {
+class StringServer : public SimpleServer, public Process {
   LCD_t *lcd;
 
 public:
-  StringLCDServer(LCD_t *new_lcd)
+  StringServer(LCD_t *new_lcd)
   : lcd(new_lcd)
   { }
 
@@ -25,7 +25,7 @@ Status::Status_t process(){
   // Packet to process?
   if(! packetPending()) return Status::Status__Good;
 
-  DEBUGprint_MISC("SLS: Prc pk\n");
+  DEBUGprint_MISC("SS: Prc pk\n");
 
   // Data in packet?
   MAP::Data_t *data_ptr = offsetPacket.packet->get_data(offsetPacket.headerOffset);
@@ -58,6 +58,93 @@ Status::Status_t process(){
   return finishedWithPacket();
 }
 };
+
+template <typename LCD_t>
+class CommandServer : public SimpleServer, public Process {
+  LCD_t *lcd;
+
+public:
+
+  typedef uint8_t Command_t;
+  static const Command_t Command__ClearScreen = 0;
+  static const Command_t Command__WriteBitmap = 1;
+  static const Command_t Command__ReadBitmap  = 2;
+  static const Command_t Command__SetContrast = 3;
+  static const Command_t Command__WriteString = 4;
+
+  CommandServer(LCD_t *new_lcd)
+  : lcd(new_lcd)
+  { }
+
+Status::Status_t process(){
+  // Packet to process?
+  if(! packetPending()) return Status::Status__Good;
+
+  DEBUGprint_MISC("BmS: Prc pk\n");
+
+  // Data in packet?
+  MAP::Data_t *data_ptr = offsetPacket.packet->get_data(offsetPacket.headerOffset);
+  if(data_ptr == NULL) return finishedWithPacket();
+
+  // Command 0: Clear screen
+  switch(*data_ptr){
+  // Clear screen
+    case Command__ClearScreen:
+      lcd->clear();
+     break;
+  // Write bitmap
+    case Command__WriteBitmap: {
+    // First byte is offset. Remaining data is actual image data.
+      // Assumes no more than 254 bitmap bytes per packet.
+      uint8_t packet_size = offsetPacket.packet->back() - data_ptr;
+      // Only proceed if at least one byte is to be written.
+      if(packet_size <= 1) break;
+      lcd->writeBitmap(data_ptr + 1, *data_ptr, packet_size - 1);
+     break;
+    }
+  // Read bitmap
+//    case Command__ReadBitmap:
+//     break;
+  // Set contrast
+    case Command__SetContrast: {
+    // First byte is new contrast.
+      uint8_t packet_size = offsetPacket.packet->back() - data_ptr;
+      if(packet_size > 0)
+        lcd->contrast(*data_ptr);
+     break;
+    }
+  // Write string
+//    case Command__WriteString:
+//     break;
+  // Unrecognized commands are ignored.
+//    default:
+  }
+
+  // Write packet contents out to screen, beginning at first row and performing a linefeed
+  // when the right edge of the screen is encountered.
+  for(uint8_t Y = 1; Y <= LCD_t::MAX_Y_FONT; Y++){
+    // Start at leftmost edge of screen
+    lcd->gotoXYFont(1,Y);
+    while(data_ptr < offsetPacket.packet->back()){
+      uint8_t response = lcd->chr(FONT_1X, *data_ptr);
+      if(response != OK){
+      // If wrapped, the character has actually been written.
+        if(response == OK_WITH_WRAP) data_ptr++;
+      // Move to next line
+        break;
+      }
+      // Move to next character
+      data_ptr++;
+    }
+  }
+
+  // Update screen
+  lcd->update();
+
+  return finishedWithPacket();
+}
+};
+
 
 /*
 class GalvLCDServer : public SimpleServer {
