@@ -46,6 +46,8 @@ template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typen
  * Return value :  None.
  */
 template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typename LCD_RST_pin_t, int X_RES, int Y_RES> void Philips_PCD8544<SPI_bus_t, LCD_DC_pin_t, LCD_CE_pin_t, LCD_RST_pin_t, X_RES, Y_RES>::contrast ( byte contrast ) {
+  DEBUGprint_FORCE("L.C:%d;", contrast);
+
     /* LCD Extended Commands. */
     send( 0x21, LCD_CMD );
 
@@ -484,8 +486,10 @@ template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typen
   // Sanity check
     if(size > CACHE_SIZE) size = CACHE_SIZE;
 
-  /* Initialize screenCache index to 0 */
-    memcpy(screenCache,imageData,size);
+  DEBUGprint_FORCE("Wbp:%d/%d;", offset, size);
+
+  // Write bitmap to cache.
+    memcpy(screenCache + offset,imageData,size);
 
   /* Expand watermark pointers, if necessary. */
     setMinimumWaterMarks(offset, offset + size - 1);
@@ -521,6 +525,8 @@ template<typename SPI_bus_t, typename LCD_DC_pin_t, typename LCD_CE_pin_t, typen
 
     if ( HiWaterMark >= CACHE_SIZE )
         HiWaterMark = CACHE_SIZE - 1;
+
+    DEBUGprint_FORCE("Lu:%d/%d;", LoWaterMark, HiWaterMark);
 
     /*  Set base address according to LoWaterMark. */
     send( 0x80 | ( LoWaterMark % X_RES ), LCD_CMD );
